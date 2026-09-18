@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07152d">
 <title>DCP Bucket List</title>
 <style>
@@ -14,9 +14,9 @@
   --main:#78cfff;--side:#a9b8ce;--rare:#b89cff;--legendary:#ffd970;--watch:#ffb86a;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;background:#050d1f}
 body{
-  margin:0;min-height:100vh;color:var(--text);
+  margin:0;min-height:100vh;color:var(--text);padding-top:env(safe-area-inset-top);
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:
     radial-gradient(circle at 10% 8%,rgba(112,207,255,.14),transparent 30rem),
@@ -182,7 +182,7 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="DCP Bucket List">
 <meta name="mobile-web-app-capable" content="yes">
 
@@ -285,6 +285,7 @@ const UNLOCK_KEY = "dcpBucketList_unlocks_v2";
 let state = {};
 let unlocks = {};
 let activeTier = "all";
+let currentMissionId = null;
 try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { state = {}; }
 try { unlocks = JSON.parse(localStorage.getItem(UNLOCK_KEY)) || {}; } catch { unlocks = {}; }
 
@@ -373,8 +374,22 @@ function pickQuest(){
   let pool=allItems().filter(i=>!state[i.id]&&i.tier!=="watch");
   if(activeTier!=="all"&&["main","side","rare","legendary"].includes(activeTier)) pool=pool.filter(i=>i.tier===activeTier);
   const out=document.getElementById("missionText");
-  if(!pool.length){out.textContent="Nothing left in this filter. You cleared the board. 🏆";celebrate();return}
+
+  if(!pool.length){
+    currentMissionId=null;
+    out.textContent="Nothing left in this filter. You cleared the board. 🏆";
+    celebrate();
+    return;
+  }
+
+  // Prevent an immediate duplicate draw when there are other choices.
+  if(currentMissionId && pool.length>1){
+    const alternatives=pool.filter(i=>i.id!==currentMissionId);
+    if(alternatives.length) pool=alternatives;
+  }
+
   const q=pool[Math.floor(Math.random()*pool.length)];
+  currentMissionId=q.id;
   out.innerHTML=`<strong>${q.label}</strong><br><span style="color:var(--muted)">${TIER_NAMES[q.tier]} · ${q.sectionTitle}</span>`;
 }
 function applyFilters(){
@@ -421,10 +436,21 @@ renderNav();renderSections();renderSummary();updateProgress();renderSources();ap
 
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(err => {
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    location.reload();
+  });
+
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register("./sw.js");
+      await registration.update();
+    } catch (err) {
       console.warn("Service worker registration failed:", err);
-    });
+    }
   });
 }
 </script>
