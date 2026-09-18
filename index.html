@@ -16,7 +16,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:#050d1f}
 body{
-  margin:0;min-height:100vh;color:var(--text);padding-top:env(safe-area-inset-top);
+  margin:0;min-height:100vh;color:var(--text);
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:
     radial-gradient(circle at 10% 8%,rgba(112,207,255,.14),transparent 30rem),
@@ -164,11 +164,11 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
  .badges .badge:first-child{display:none}
 }
 @media(max-width:900px){
- .app{display:block;width:min(100% - 18px,780px);padding-top:12px}.sidebar{display:none}.mobile-top{display:block;padding:18px 4px 12px}
+ .app{display:block;width:min(100% - 18px,780px);padding-top:calc(12px + env(safe-area-inset-top))}.sidebar{display:none}.mobile-top{display:block;padding:18px 4px 12px}
  .mobile-top h1{font-size:clamp(2.8rem,12vw,5rem);margin:13px 0 0}.mobile-progress{display:grid;grid-template-columns:88px 1fr;gap:13px;align-items:center;margin-top:17px;padding:14px;border-radius:19px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.085)}
  .mobile-progress .ring{width:88px;height:88px}.mobile-progress .ring:after{width:67px;height:67px}.mobile-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
- .hero{grid-template-columns:1fr;padding:23px;min-height:0}.hero:after{font-size:6rem;right:15px}.mission{min-height:140px}
- .toolbar{top:7px;display:grid;grid-template-columns:1fr}.filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px}.filter{flex:none}
+ .hero{grid-template-columns:1fr;padding:23px;min-height:0}.hero:after{font-size:6rem;right:15px}.mission{min-height:140px;backdrop-filter:none;-webkit-backdrop-filter:none}
+ .toolbar{position:relative;top:auto;display:grid;grid-template-columns:1fr;backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(6,18,43,.98)}.filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px}.filter{flex:none}
  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.section.wide{grid-column:auto}
  .source-list{grid-template-columns:1fr}
 }
@@ -436,17 +436,9 @@ renderNav();renderSections();renderSummary();updateProgress();renderSources();ap
 
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  let refreshing = false;
-
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (refreshing) return;
-    refreshing = true;
-    location.reload();
-  });
-
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register("./sw.js");
+      const registration = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
       await registration.update();
     } catch (err) {
       console.warn("Service worker registration failed:", err);
