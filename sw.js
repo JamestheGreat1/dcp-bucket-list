@@ -17,11 +17,19 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+      await self.clients.claim();
+
+      // Refresh any already-open installed app/window once so it immediately
+      // picks up the newest HTML instead of staying on the old cached shell.
+      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      await Promise.all(
+        clients.map(client => client.navigate(client.url).catch(() => null))
+      );
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
