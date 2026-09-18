@@ -1,4 +1,4 @@
-const CACHE_NAME = "dcp-bucket-list-v2";
+const CACHE_NAME = "dcp-bucket-list-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -19,15 +19,10 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
-      await self.clients.claim();
-
-      // Refresh any already-open installed app/window once so it immediately
-      // picks up the newest HTML instead of staying on the old cached shell.
-      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       await Promise.all(
-        clients.map(client => client.navigate(client.url).catch(() => null))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       );
+      await self.clients.claim();
     })()
   );
 });
@@ -36,15 +31,17 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
   const request = event.request;
-  const isNavigation = request.mode === "navigate" ||
-    request.headers.get("accept")?.includes("text/html");
+  const acceptsHTML = request.headers.get("accept")?.includes("text/html");
+  const isNavigation = request.mode === "navigate" || acceptsHTML;
 
   if (isNavigation) {
     event.respondWith(
       fetch(request, { cache: "no-store" })
         .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+          }
           return response;
         })
         .catch(() => caches.match("./index.html"))
@@ -54,13 +51,15 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     caches.match(request).then(cached => {
-      const network = fetch(request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-        return response;
-      }).catch(() => cached);
+      if (cached) return cached;
 
-      return cached || network;
+      return fetch(request).then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+        }
+        return response;
+      });
     })
   );
 });
