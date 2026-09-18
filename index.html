@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07152d">
+<title>DCP Bucket List</title>
+<style>
+:root{
+  --bg0:#050d1f;--bg1:#081c3c;--bg2:#14244b;--panel:rgba(255,255,255,.065);
+  --panel2:rgba(255,255,255,.095);--line:rgba(255,255,255,.12);--text:#f8fbff;
+  --muted:#aec3df;--gold:#ffd970;--sky:#70cfff;--lav:#aa91ff;--green:#7ce5b2;
+  --rose:#ff8ca2;--orange:#ffb86a;--shadow:0 22px 70px rgba(0,0,0,.3);
+  --main:#78cfff;--side:#a9b8ce;--rare:#b89cff;--legendary:#ffd970;--watch:#ffb86a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 10% 8%,rgba(112,207,255,.14),transparent 30rem),
+    radial-gradient(circle at 90% 12%,rgba(170,145,255,.15),transparent 34rem),
+    linear-gradient(180deg,var(--bg0),var(--bg1) 48%,var(--bg2));
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.12;
+  background-image:
+    radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px),
+    radial-gradient(circle,rgba(255,217,112,.7) 0 1px,transparent 1.5px);
+  background-size:82px 82px,143px 143px;background-position:0 0,40px 55px;
+}
+button,input{font:inherit} button,label{ -webkit-tap-highlight-color:transparent }
+a{color:inherit}
+.app{
+  width:min(1540px,calc(100% - 34px));margin:auto;padding:26px 0 72px;
+  display:grid;grid-template-columns:330px minmax(0,1fr);gap:24px;align-items:start;
+}
+.sidebar{
+  position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;
+  padding:23px;border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,.105),rgba(255,255,255,.05));
+  border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(18px);
+}
+.brand{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;
+  border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#ddecff;
+}
+h1{font-size:clamp(2.35rem,4vw,4.2rem);line-height:.89;letter-spacing:-.06em;margin:18px 0 9px}
+h1 span{display:block;color:var(--gold)}
+.muted,.intro{color:var(--muted)}
+.intro{font-size:.92rem;line-height:1.5;margin:0}
+.program-window{margin-top:14px;padding:11px 12px;border-radius:14px;background:rgba(255,217,112,.07);border:1px solid rgba(255,217,112,.15);font-size:.8rem;color:#f8e8b4;font-weight:750}
+.progress-box{display:grid;grid-template-columns:103px 1fr;gap:14px;align-items:center;margin:22px 0 17px}
+.ring{
+  --p:0deg;width:103px;height:103px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) var(--p),rgba(255,255,255,.08) 0);position:relative;
+}
+.ring:after{content:"";position:absolute;width:78px;height:78px;border-radius:50%;background:#0b2148;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ring strong{position:relative;z-index:1;font-size:1.35rem}
+.progress-copy strong{display:block;font-size:1.02rem}
+.progress-copy span{display:block;color:var(--muted);font-size:.8rem;line-height:1.35;margin-top:4px}
+.stat-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:14px 0}
+.stat-mini div{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07)}
+.stat-mini b{display:block;font-size:.95rem}.stat-mini small{color:var(--muted);font-size:.68rem}
+.nav{display:grid;gap:5px;margin:16px 0}
+.nav a{text-decoration:none;padding:8px 10px;border-radius:11px;color:#dceaff;font-size:.82rem;font-weight:750;border:1px solid transparent}
+.nav a:hover{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.08)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+button,.file-btn{
+  cursor:pointer;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:rgba(255,255,255,.07);
+  color:white;padding:10px;font-weight:850;font-size:.8rem;text-align:center;transition:.15s ease;
+}
+button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+.primary{background:var(--gold);color:#17213a;border:none}
+.danger{color:#ffd7de;border-color:rgba(255,140,162,.2);background:rgba(255,140,162,.07)}
+.file-input{display:none}
+.main{min-width:0}
+.mobile-top{display:none}
+.hero{
+  min-height:275px;padding:34px;border-radius:30px;display:grid;grid-template-columns:1.25fr .75fr;gap:22px;align-items:end;
+  border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;position:relative;
+  background:linear-gradient(135deg,rgba(8,38,88,.92),rgba(86,66,146,.52)),radial-gradient(circle at 82% 10%,rgba(255,217,112,.18),transparent 24rem);
+}
+.hero:after{content:"✦";position:absolute;right:35px;top:8px;font-size:10rem;color:rgba(255,217,112,.08);transform:rotate(12deg)}
+.hero h2{font-size:clamp(2.15rem,4.5vw,4.6rem);letter-spacing:-.055em;line-height:.94;margin:0;max-width:820px}
+.hero h2 span{color:var(--gold)}
+.hero p{color:#d3e4f8;line-height:1.6;max-width:760px;margin:16px 0 0}
+.mission{z-index:1;align-self:stretch;padding:20px;border-radius:22px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.075);backdrop-filter:blur(10px);display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+.mission small{font-size:.72rem;text-transform:uppercase;letter-spacing:.11em;font-weight:900;color:var(--muted)}
+#missionText{font-weight:800;line-height:1.45;margin-top:8px}
+.toolbar{
+  position:sticky;top:12px;z-index:20;margin:16px 0;padding:10px;border-radius:18px;
+  background:rgba(6,18,43,.86);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);
+  display:flex;gap:8px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.18)
+}
+.search{flex:1;min-width:140px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:10px 12px;color:white;outline:none}
+.search::placeholder{color:#91a8c8}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filter{padding:9px 10px;font-size:.73rem}
+.filter.active{background:#fff;color:#10203a}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 23px}
+.summary-card{padding:14px;border-radius:17px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.summary-card.done{border-color:rgba(124,229,178,.24);background:linear-gradient(135deg,rgba(124,229,178,.13),rgba(255,217,112,.05))}
+.summary-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.summary-top strong{font-size:.82rem}.summary-top span{font-size:.74rem;color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:9px}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sky),var(--gold));border-radius:inherit}
+.content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.section{min-width:0;scroll-margin-top:90px}.section.wide{grid-column:1/-1}
+.section-head{display:flex;justify-content:space-between;gap:15px;align-items:end;padding:0 3px;margin-bottom:9px}
+.title-wrap{display:flex;gap:11px;align-items:center}.icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,rgba(112,207,255,.13),rgba(170,145,255,.12));border:1px solid rgba(255,255,255,.09)}
+.section h3{margin:0;font-size:1.16rem}.section-head small{color:var(--muted);font-size:.75rem}
+.section-desc{color:var(--muted);font-size:.78rem;margin:2px 0 0}
+.card{border-radius:21px;padding:8px;background:linear-gradient(180deg,rgba(255,255,255,.068),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.085);box-shadow:0 13px 34px rgba(0,0,0,.13)}
+.section.wide .card{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 7px}
+.item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:14px;cursor:pointer;min-width:0;transition:.15s ease;position:relative}
+.item:hover{background:rgba(255,255,255,.05)}
+.item.hidden{display:none}
+.item input{position:absolute;opacity:0;pointer-events:none}
+.check{width:23px;height:23px;border-radius:8px;flex:none;border:1.5px solid rgba(255,255,255,.23);background:rgba(255,255,255,.02);position:relative;transition:.15s ease}
+.item input:checked + .check{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(124,229,178,.07)}
+.item input:checked + .check:after{
+  content:"";
+  position:absolute;
+  width:7px;
+  height:11px;
+  border-right:3px solid #153449;
+  border-bottom:3px solid #153449;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-58%) rotate(45deg);
+  transform-origin:center;
+}
+.item-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.item-label{font-weight:700;line-height:1.28}
+.item input:checked ~ .item-main .item-label{text-decoration:line-through;opacity:.52}
+.note{font-size:.69rem;color:#93a9c7;line-height:1.3}
+.badges{display:flex;gap:5px;align-items:center;flex:none}
+.badge{font-size:.61rem;text-transform:uppercase;letter-spacing:.06em;font-weight:900;border-radius:99px;padding:4px 6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);white-space:nowrap}
+.tier-main{color:var(--main);border-color:rgba(120,207,255,.2)}.tier-side{color:#cad5e4}.tier-rare{color:var(--rare);border-color:rgba(184,156,255,.22)}.tier-legendary{color:var(--legendary);border-color:rgba(255,217,112,.23)}.tier-watch{color:var(--watch);border-color:rgba(255,184,106,.25)}
+.verified{color:var(--green)}
+.legend{
+  display:flex;gap:7px;flex-wrap:wrap;margin:15px 0 0;padding:0 3px;color:var(--muted);font-size:.72rem
+}
+.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.sources{margin-top:24px;border-radius:22px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.045);overflow:hidden}
+.sources summary{cursor:pointer;padding:16px 18px;font-weight:850}
+.source-list{padding:0 18px 18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.source{padding:11px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.065)}
+.source a{font-weight:800;text-decoration:none}.source p{margin:4px 0 0;color:var(--muted);font-size:.74rem;line-height:1.35}
+.footer{text-align:center;color:var(--muted);font-size:.76rem;margin-top:27px;line-height:1.45}
+.toast{
+  position:fixed;right:22px;bottom:22px;z-index:1000;max-width:360px;padding:15px 16px;border-radius:17px;
+  background:rgba(11,31,65,.95);border:1px solid rgba(255,217,112,.25);box-shadow:var(--shadow);
+  transform:translateY(130%);opacity:0;transition:.28s ease;backdrop-filter:blur(15px)
+}
+.toast.show{transform:translateY(0);opacity:1}.toast small{display:block;color:var(--gold);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900}.toast strong{display:block;margin-top:3px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:999}
+.confetti span{position:absolute;top:-20px;width:9px;height:15px;border-radius:2px;animation:fall 1.9s linear forwards}
+@keyframes fall{to{transform:translate3d(var(--x),110vh,0) rotate(720deg);opacity:.85}}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:1180px){
+ .app{grid-template-columns:275px minmax(0,1fr)}
+ .section.wide .card{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .badges .badge:first-child{display:none}
+}
+@media(max-width:900px){
+ .app{display:block;width:min(100% - 18px,780px);padding-top:12px}.sidebar{display:none}.mobile-top{display:block;padding:18px 4px 12px}
+ .mobile-top h1{font-size:clamp(2.8rem,12vw,5rem);margin:13px 0 0}.mobile-progress{display:grid;grid-template-columns:88px 1fr;gap:13px;align-items:center;margin-top:17px;padding:14px;border-radius:19px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.085)}
+ .mobile-progress .ring{width:88px;height:88px}.mobile-progress .ring:after{width:67px;height:67px}.mobile-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+ .hero{grid-template-columns:1fr;padding:23px;min-height:0}.hero:after{font-size:6rem;right:15px}.mission{min-height:140px}
+ .toolbar{top:7px;display:grid;grid-template-columns:1fr}.filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:1px}.filter{flex:none}
+ .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}.section.wide{grid-column:auto}
+ .source-list{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+ .hero{border-radius:22px}.hero h2{font-size:2.15rem}.summary-grid{gap:7px}.summary-card{padding:12px}
+ .section.wide .card{grid-template-columns:1fr}.tag-only{display:none}.item{padding:11px 10px}.note{font-size:.67rem}
+ .toast{left:10px;right:10px;bottom:10px}.badges{max-width:110px;justify-content:flex-end;flex-wrap:wrap}
+}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DCP Bucket List">
+<meta name="mobile-web-app-capable" content="yes">
+
+</head>
+<body>
+<div class="confetti" id="confetti"></div>
+<div class="toast" id="toast"><small>Achievement unlocked</small><strong id="toastText"></strong></div>
+
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">✦ DCP Completionist Save</div>
+  <h1>DCP Bucket <span>List.</span></h1>
+  <p class="intro">A seven-month Disney World side-quest tracker, now with achievement tiers and enough completionism to become mildly concerning.</p>
+  <div class="program-window">JAN 5 → AUG 12, 2027 · Walt Disney World</div>
+  <div class="progress-box">
+    <div class="ring" id="desktopRing"><strong id="desktopPct">0%</strong></div>
+    <div class="progress-copy"><strong id="desktopCount">0 / 0</strong><span>James% completion<br>Watch List excluded</span></div>
+  </div>
+  <div class="stat-mini">
+    <div><b id="mainStat">0/0</b><small>Main Quests</small></div>
+    <div><b id="legendStat">0/0</b><small>Legendary</small></div>
+    <div><b id="categoryStat">0</b><small>Categories cleared</small></div>
+    <div><b id="watchStat">0/0</b><small>2027 Watch</small></div>
+  </div>
+  <nav class="nav" id="nav"></nav>
+  <div class="actions">
+    <button class="primary" id="desktopRandom">✨ Random quest</button>
+    <button id="desktopExport">Export</button>
+    <label class="file-btn">Import<input class="file-input" id="desktopImport" type="file" accept=".json"></label>
+    <button class="danger" id="desktopReset">Reset</button>
+  </div>
+</aside>
+
+<main class="main">
+  <section class="mobile-top">
+    <div class="brand">✦ DCP Completionist Save</div>
+    <h1>DCP Bucket <span>List.</span></h1>
+    <div class="program-window">JAN 5 → AUG 12, 2027 · Walt Disney World</div>
+    <div class="mobile-progress">
+      <div class="ring" id="mobileRing"><strong id="mobilePct">0%</strong></div>
+      <div class="progress-copy">
+        <strong id="mobileCount">0 / 0</strong><span>James% completion · auto-saved locally</span>
+        <div class="mobile-actions">
+          <button class="primary" id="mobileRandom">✨ Random</button>
+          <button id="mobileExport">Export</button>
+          <label class="file-btn">Import<input class="file-input" id="mobileImport" type="file" accept=".json"></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero">
+    <div>
+      <h2>Turn the DCP into one giant <span>completionist run.</span></h2>
+      <p>Main quests cover the essentials. Side quests are pure vibes. Rare achievements require commitment. Legendary achievements are the ones you’ll still be yapping about five years later.</p>
+      <div class="legend">
+        <span style="color:var(--main)"><i class="dot"></i>Main Quest</span>
+        <span style="color:var(--side)"><i class="dot"></i>Side Quest</span>
+        <span style="color:var(--rare)"><i class="dot"></i>Rare</span>
+        <span style="color:var(--legendary)"><i class="dot"></i>Legendary</span>
+        <span style="color:var(--watch)"><i class="dot"></i>2027 Watch</span>
+      </div>
+    </div>
+    <div class="mission">
+      <div><small>Tonight’s mission</small><div id="missionText">Hit randomize whenever decision paralysis wins.</div></div>
+      <button class="primary" id="heroRandom">🎲 Pick something</button>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <input class="search" id="search" placeholder="Search quests, resorts, rides…">
+    <div class="filters" id="filters">
+      <button class="filter active" data-tier="all">All</button>
+      <button class="filter" data-tier="main">Main</button>
+      <button class="filter" data-tier="side">Side</button>
+      <button class="filter" data-tier="rare">Rare</button>
+      <button class="filter" data-tier="legendary">Legendary</button>
+      <button class="filter" data-tier="watch">2027 Watch</button>
+      <button class="filter" data-tier="incomplete">Incomplete</button>
+    </div>
+  </div>
+
+  <div class="summary-grid" id="summary"></div>
+  <div class="content-grid" id="bucket"></div>
+
+  <details class="sources">
+    <summary>✓ Verification log — checked September 17, 2026</summary>
+    <div class="source-list" id="sourceList"></div>
+  </details>
+  <div class="footer">Unofficial personal tracker · attraction availability can change · progress is stored only in this browser unless exported.</div>
+</main>
+</div>
+
+<script>
+const DATA = [{"id": "parks", "title": "The Four Parks", "icon": "🏰", "master": "All 4 Parks", "accent": "castle", "items": [{"id": "dak", "label": "Disney’s Animal Kingdom", "tier": "main", "tag": "Park"}, {"id": "dhs", "label": "Disney’s Hollywood Studios", "tier": "main", "tag": "Park"}, {"id": "dmk", "label": "Magic Kingdom", "tier": "main", "tag": "Park"}, {"id": "epcot", "label": "EPCOT", "tier": "main", "tag": "Park"}]}, {"id": "park-achievements", "title": "Park Completionist", "icon": "🎢", "accent": "ride", "items": [{"id": "four-parks-day", "label": "All 4 parks in one day", "tier": "legendary", "tag": "Challenge"}, {"id": "rope-drop-all", "label": "Rope drop all 4 parks at least once", "tier": "rare", "tag": "Challenge"}, {"id": "close-all", "label": "Close all 4 parks at least once", "tier": "rare", "tag": "Challenge"}, {"id": "open-close-day", "label": "Do one true open-to-close park day", "tier": "rare", "tag": "Challenge"}, {"id": "every-ride-one-park", "label": "Ride every operating attraction in one park in a single day", "tier": "legendary", "tag": "Challenge"}, {"id": "every-wdw-coaster", "label": "Ride every operating WDW roller coaster during the program", "tier": "legendary", "tag": "Coaster"}, {"id": "tianas", "label": "Ride Tiana’s Bayou Adventure", "tier": "main", "tag": "Verified", "note": "Expected back from routine refurbishment in December 2026."}, {"id": "big-thunder", "label": "Ride refurbished Big Thunder Mountain Railroad", "tier": "main", "tag": "Verified", "note": "Reopened May 3, 2026 after a major refurbishment."}, {"id": "muppets-rrc", "label": "Rock ’n’ Roller Coaster Starring The Muppets", "tier": "main", "tag": "Verified", "note": "Opened May 26, 2026."}, {"id": "flight", "label": "Avatar Flight of Passage (get skinny arc)", "tier": "main", "tag": "Verified"}, {"id": "zootopia", "label": "Zootopia: Better Zoogether!", "tier": "side", "tag": "Verified", "note": "Currently operating in the Tree of Life Theater."}, {"id": "fantasmic", "label": "Watch Fantasmic! fr", "tier": "main", "tag": "Verified"}, {"id": "galactic-hero", "label": "Hit Galactic Hero on Buzz Lightyear", "tier": "rare", "tag": "Score"}, {"id": "rebel-spy", "label": "Get picked as the Rebel Spy on Star Tours", "tier": "legendary", "tag": "Luck"}, {"id": "falcon-pilot", "label": "Pilot the Millennium Falcon", "tier": "rare", "tag": "Role"}, {"id": "pandora-night", "label": "See Pandora after dark", "tier": "side", "tag": "Night"}, {"id": "galaxys-edge-night", "label": "See Galaxy’s Edge at night", "tier": "side", "tag": "Night"}, {"id": "main-street-late", "label": "Linger on Main Street after park close", "tier": "side", "tag": "Vibes"}, {"id": "peoplemover-lap", "label": "Take a completely unnecessary PeopleMover lap", "tier": "side", "tag": "Correct"}, {"id": "rain-ride", "label": "Ride something during a Florida downpour", "tier": "rare", "tag": "Florida"}]}, {"id": "transport", "title": "Transportation Bingo", "icon": "🚝", "master": "All Disney transport modes", "accent": "transport", "items": [{"id": "monorail", "label": "Ride the Monorail", "tier": "main", "tag": "Transport"}, {"id": "monorail-resort", "label": "Complete a full Resort Monorail loop", "tier": "side", "tag": "Monorail"}, {"id": "monorail-epcot", "label": "Ride the EPCOT Monorail line", "tier": "side", "tag": "Monorail"}, {"id": "monorail-express", "label": "Ride the Express Monorail", "tier": "side", "tag": "Monorail"}, {"id": "boats", "label": "Ride a Disney boat", "tier": "main", "tag": "Transport"}, {"id": "friendship-boat", "label": "Ride a Friendship Boat", "tier": "side", "tag": "Boat"}, {"id": "mk-resort-boat", "label": "Ride a Magic Kingdom resort boat", "tier": "side", "tag": "Boat"}, {"id": "springs-boat", "label": "Ride a Disney Springs resort boat", "tier": "side", "tag": "Boat"}, {"id": "skyliner", "label": "Ride the Skyliner", "tier": "main", "tag": "Transport"}, {"id": "skyliner-all-lines", "label": "Ride every Skyliner segment", "tier": "rare", "tag": "Skyliner"}, {"id": "busses", "label": "Ride Disney buses", "tier": "main", "tag": "Transport"}, {"id": "transport-day", "label": "Monorail + Skyliner + boat + bus in one day", "tier": "legendary", "tag": "Challenge"}, {"id": "bad-route", "label": "Take Disney transportation somewhere in the least efficient way possible", "tier": "side", "tag": "For science"}]}, {"id": "minigolf", "title": "Mini Golf Grand Slam", "icon": "⛳", "master": "All 4 Disney mini-golf courses", "accent": "golf", "items": [{"id": "fantasia-gardens", "label": "Fantasia Gardens", "tier": "main", "tag": "Verified"}, {"id": "fantasia-fairways", "label": "Fantasia Fairways", "tier": "main", "tag": "Verified"}, {"id": "winter", "label": "Winter Course — Winter Summerland", "tier": "main", "tag": "Verified"}, {"id": "summer", "label": "Summer Course — Winter Summerland", "tier": "main", "tag": "Verified"}]}, {"id": "resorts", "title": "Resort Crawl", "icon": "🛎️", "master": "Every Disney resort destination on this list", "accent": "resort", "items": [{"id": "art-animation", "label": "Art of Animation", "tier": "main", "tag": "Value"}, {"id": "pop-century", "label": "Pop Century", "tier": "main", "tag": "Value"}, {"id": "all-star-movies", "label": "All-Star Movies", "tier": "main", "tag": "Value"}, {"id": "all-star-music", "label": "All-Star Music", "tier": "main", "tag": "Value"}, {"id": "all-star-sports", "label": "All-Star Sports", "tier": "main", "tag": "Value"}, {"id": "caribbean-beach", "label": "Caribbean Beach", "tier": "main", "tag": "Moderate"}, {"id": "coronado-springs", "label": "Coronado Springs", "tier": "main", "tag": "Moderate"}, {"id": "port-orleans-fq", "label": "Port Orleans — French Quarter", "tier": "main", "tag": "Moderate"}, {"id": "port-orleans-riverside", "label": "Port Orleans — Riverside", "tier": "main", "tag": "Moderate"}, {"id": "fort-wilderness", "label": "Fort Wilderness Resort & Campground", "tier": "main", "tag": "Resort"}, {"id": "fort-wilderness-cabins", "label": "The Cabins at Fort Wilderness", "tier": "main", "tag": "DVC"}, {"id": "ak-lodge", "label": "Animal Kingdom Lodge", "tier": "main", "tag": "Deluxe"}, {"id": "beach-club", "label": "Beach Club", "tier": "main", "tag": "Deluxe"}, {"id": "boardwalk-inn", "label": "BoardWalk Inn", "tier": "main", "tag": "Deluxe"}, {"id": "contemporary", "label": "Contemporary", "tier": "main", "tag": "Deluxe"}, {"id": "grand-floridian", "label": "Grand Floridian", "tier": "main", "tag": "Deluxe"}, {"id": "polynesian", "label": "Polynesian Village", "tier": "main", "tag": "Deluxe"}, {"id": "yacht-club", "label": "Yacht Club", "tier": "main", "tag": "Deluxe"}, {"id": "wilderness-lodge", "label": "Wilderness Lodge", "tier": "main", "tag": "Deluxe"}, {"id": "old-key-west", "label": "Old Key West", "tier": "main", "tag": "DVC"}, {"id": "riviera", "label": "Riviera Resort", "tier": "main", "tag": "DVC"}, {"id": "saratoga", "label": "Saratoga Springs Resort & Spa", "tier": "main", "tag": "DVC"}, {"id": "resort-movie", "label": "Watch a Movie Under the Stars", "tier": "side", "tag": "Resort"}, {"id": "resort-campfire", "label": "Do a Disney resort campfire", "tier": "side", "tag": "Resort"}, {"id": "chip-dale-campfire", "label": "Chip ’n’ Dale’s Campfire Sing-A-Long", "tier": "rare", "tag": "Fort Wilderness"}, {"id": "crescent-loop", "label": "Walk the Crescent Lake resort loop", "tier": "side", "tag": "Resort Crawl"}, {"id": "skyliner-crawl", "label": "Do a Skyliner resort crawl", "tier": "rare", "tag": "Resort Crawl"}, {"id": "monorail-crawl", "label": "Do a Monorail resort crawl", "tier": "rare", "tag": "Resort Crawl"}, {"id": "akl-animals", "label": "Animal viewing at Animal Kingdom Lodge", "tier": "side", "tag": "Resort"}, {"id": "poly-beach", "label": "Polynesian beach at night", "tier": "side", "tag": "Vibes"}, {"id": "boardwalk-night", "label": "BoardWalk at night", "tier": "side", "tag": "Vibes"}, {"id": "beignets", "label": "Get beignets at French Quarter", "tier": "side", "tag": "Snack"}]}, {"id": "wdw-mustdos", "title": "WDW Must-Dos", "icon": "✨", "accent": "sparkle", "items": [{"id": "beak-barrel", "label": "The Beak and Barrel", "tier": "main", "tag": "Verified"}, {"id": "electrical-pageant", "label": "Watch the Electrical Water Pageant", "tier": "side", "tag": "Verified"}, {"id": "behind-seeds", "label": "Behind the Seeds tour", "tier": "rare", "tag": "Verified", "note": "Currently offered at EPCOT; separate charge."}, {"id": "soarin-america", "label": "Ride Soarin’ Across America", "tier": "main", "tag": "Verified", "note": "Currently operating as a limited-time EPCOT version and listed for 2027 EPCOT After Hours dates through Aug. 19."}, {"id": "bts-tour", "label": "Do at least one behind-the-scenes Disney tour", "tier": "main", "tag": "Tour"}, {"id": "rainforest", "label": "Rainforest Cafe", "tier": "main", "tag": "Verified"}, {"id": "dinosaur-restaurant", "label": "T-REX Restaurant at Disney Springs", "tier": "main", "tag": "Verified", "note": "Your original “Dinosaur Restaurant” — renamed here so we don’t confuse it with the retired DINOSAUR attraction."}, {"id": "disney-springs", "label": "Actually explore Disney Springs instead of just speedrunning a store", "tier": "side", "tag": "Disney Springs"}, {"id": "festival-arts", "label": "EPCOT Festival of the Arts (Jan 15–Mar 1, 2027)", "tier": "main", "tag": "2027"}, {"id": "festival-broadway", "label": "See DISNEY ON BROADWAY at Festival of the Arts", "tier": "side", "tag": "2027"}, {"id": "festival-fg", "label": "EPCOT Flower & Garden Festival (Mar 10–May 31, 2027)", "tier": "main", "tag": "2027"}, {"id": "garden-rocks", "label": "See a Garden Rocks concert", "tier": "side", "tag": "2027"}, {"id": "epcot-snack-world", "label": "Eat or drink something from every World Showcase pavilion", "tier": "legendary", "tag": "EPCOT"}, {"id": "epcot-photo-world", "label": "Take a photo in every World Showcase pavilion", "tier": "rare", "tag": "EPCOT"}, {"id": "hidden-mickey", "label": "Find a Hidden Mickey without looking it up", "tier": "side", "tag": "Imagineering"}, {"id": "hidden-mickey-25", "label": "Find 25 Hidden Mickeys", "tier": "rare", "tag": "Imagineering"}, {"id": "details-four-parks", "label": "Find one absurdly specific Imagineering detail in every park", "tier": "rare", "tag": "Imagineering"}, {"id": "zero-plan-day", "label": "Do one park day with absolutely no itinerary", "tier": "rare", "tag": "Therapy"}, {"id": "overlooked-day", "label": "Spend a park day prioritizing overlooked attractions", "tier": "side", "tag": "Deep Cut"}]}, {"id": "dcp-life", "title": "DCP Life Achievements", "icon": "🦩", "accent": "dcp", "items": [{"id": "traditions", "label": "Traditions", "tier": "main", "tag": "DCP"}, {"id": "earning-ears", "label": "First day earning my ears", "tier": "main", "tag": "DCP"}, {"id": "first-guest-compliment", "label": "First guest compliment / recognition", "tier": "rare", "tag": "Cast"}, {"id": "guest-memory", "label": "Create one guest interaction I genuinely remember", "tier": "main", "tag": "Cast"}, {"id": "first-open-shift", "label": "First opening shift", "tier": "side", "tag": "Cast"}, {"id": "first-close-shift", "label": "First closing shift", "tier": "side", "tag": "Cast"}, {"id": "after-work-park", "label": "Go straight from work to a park", "tier": "main", "tag": "DCP"}, {"id": "before-work-park", "label": "Go to a park before work", "tier": "rare", "tag": "DCP"}, {"id": "late-postwork", "label": "Stupidly late post-work park trip", "tier": "rare", "tag": "DCP"}, {"id": "fcv-event", "label": "Attend at least one FCV event", "tier": "main", "tag": "FCV"}, {"id": "fcv-five", "label": "Attend 5 FCV / Disney Programs events", "tier": "rare", "tag": "FCV"}, {"id": "program-learning", "label": "Attend a Disney Programs learning or career event", "tier": "main", "tag": "Career"}, {"id": "network-person", "label": "Talk with someone whose Disney career path interests me", "tier": "rare", "tag": "Career"}, {"id": "new-disney-career", "label": "Learn about a Disney career I didn’t know existed", "tier": "side", "tag": "Career"}, {"id": "friend-other-role", "label": "Make a friend in a completely different role", "tier": "side", "tag": "People"}, {"id": "friend-international", "label": "Make a friend from another country", "tier": "side", "tag": "People"}, {"id": "visit-friend-work", "label": "Visit a friend at their work location", "tier": "side", "tag": "People"}, {"id": "friend-visits-work", "label": "Have a friend visit me at my work location", "tier": "side", "tag": "People"}, {"id": "coworker-hang", "label": "Do something with coworkers after a shift", "tier": "main", "tag": "People"}, {"id": "roommate-dinner", "label": "Cook dinner for roommates/friends", "tier": "side", "tag": "FCV"}, {"id": "fcv-pool", "label": "FCV pool night", "tier": "side", "tag": "FCV"}, {"id": "fcv-both", "label": "Explore both FCV East and West", "tier": "side", "tag": "FCV"}, {"id": "fcv-gym", "label": "Use the FCV gym enough times that it counts as a habit", "tier": "rare", "tag": "Personal"}]}, {"id": "photos", "title": "Core Memory Protocol", "icon": "📸", "accent": "photo", "items": [{"id": "pictures", "label": "TAKE PICTURES. LOTS OF ’EM.", "tier": "main", "tag": "Critical"}, {"id": "weekly-photo", "label": "Take at least one intentional photo every week", "tier": "rare", "tag": "Photo"}, {"id": "roommate-photo", "label": "Group photo with roommates / close DCP friends", "tier": "main", "tag": "Photo"}, {"id": "coworker-photo", "label": "Take photos with coworkers", "tier": "main", "tag": "Photo"}, {"id": "day1-final-photo", "label": "Recreate the same photo on Day 1 and final week", "tier": "legendary", "tag": "Core Memory"}, {"id": "castle-photo", "label": "Main Street / castle hero shot", "tier": "side", "tag": "Photo"}, {"id": "epcot-photo", "label": "Spaceship Earth hero shot", "tier": "side", "tag": "Photo"}, {"id": "tower-photo", "label": "Tower of Terror hero shot", "tier": "side", "tag": "Photo"}, {"id": "tree-photo", "label": "Tree of Life hero shot", "tier": "side", "tag": "Photo"}, {"id": "sunrise-disney", "label": "Disney sunrise photo", "tier": "rare", "tag": "Photo"}, {"id": "sunset-disney", "label": "Disney sunset photo", "tier": "side", "tag": "Photo"}, {"id": "disposable-day", "label": "Do one disposable-camera / film-style park day", "tier": "rare", "tag": "Photo"}, {"id": "weekly-memory", "label": "Write down one favorite memory each week", "tier": "rare", "tag": "Journal"}, {"id": "dcp-movie", "label": "Make a final DCP recap video", "tier": "legendary", "tag": "Finale"}, {"id": "photo-album", "label": "Make a DCP photo album", "tier": "legendary", "tag": "Finale"}]}, {"id": "personal", "title": "Character Development Arc", "icon": "🧑‍🍳", "accent": "personal", "items": [{"id": "learn-bake", "label": "Learn to bake", "tier": "main", "tag": "Skill"}, {"id": "five-recipes", "label": "Learn 5 actual recipes", "tier": "rare", "tag": "Skill"}, {"id": "scratch-bake", "label": "Bake something from scratch", "tier": "side", "tag": "Skill"}, {"id": "impressive-meal", "label": "Cook one legitimately impressive meal", "tier": "rare", "tag": "Skill"}, {"id": "fitness-goal", "label": "Make meaningful progress on my fitness goal", "tier": "main", "tag": "Personal"}, {"id": "solo-park", "label": "Do one full solo park day", "tier": "rare", "tag": "Personal"}, {"id": "phone-pocket", "label": "One full park hour with the phone in my pocket", "tier": "side", "tag": "Personal"}, {"id": "meaningful-souvenir", "label": "Buy one genuinely meaningful souvenir", "tier": "side", "tag": "Personal"}, {"id": "postcards", "label": "Send postcards home from Disney", "tier": "side", "tag": "Personal"}, {"id": "name-tag-keepsake", "label": "Keep my name tag / program keepsake after the program", "tier": "main", "tag": "Finale"}, {"id": "letter-future", "label": "Write final-week James a letter during first week", "tier": "rare", "tag": "Core Memory"}, {"id": "read-letter", "label": "Read that letter during final week", "tier": "legendary", "tag": "Core Memory"}, {"id": "scary-thing", "label": "Do something I almost talked myself out of", "tier": "rare", "tag": "Growth"}]}, {"id": "water-parks", "title": "Water Parks & Recreation", "icon": "🌊", "accent": "water", "description": "Seasonal operations can rotate, so check the calendar during the program.", "items": [{"id": "blizzard-beach", "label": "Visit Blizzard Beach", "tier": "side", "tag": "Water Park", "note": "Operating as of Sept. 2026; seasonal availability can change."}, {"id": "water-park-day", "label": "Do a full Disney water park day", "tier": "rare", "tag": "Water Park"}, {"id": "lazy-river", "label": "Complete a full lazy-river lap", "tier": "side", "tag": "Water Park"}, {"id": "big-water-slide", "label": "Do at least one big Disney water slide", "tier": "side", "tag": "Water Park"}, {"id": "typhoon-lagoon", "label": "Visit Typhoon Lagoon if operating during the program", "tier": "watch", "tag": "2027 Watch", "note": "Currently closed for refurbishment; Disney says to check back in 2027."}, {"id": "typhoon-wave", "label": "Catch the Typhoon Lagoon Surf Pool wave if available", "tier": "watch", "tag": "2027 Watch"}]}, {"id": "orlando", "title": "Beyond the Bubble", "icon": "🌎", "accent": "orlando", "items": [{"id": "epic-universe", "label": "Epic Universe", "tier": "main", "tag": "Universal"}, {"id": "universal-studios", "label": "Universal Studios Florida", "tier": "side", "tag": "Universal"}, {"id": "islands-adventure", "label": "Islands of Adventure", "tier": "side", "tag": "Universal"}, {"id": "volcano-bay", "label": "Volcano Bay", "tier": "side", "tag": "Universal"}, {"id": "velocicoaster", "label": "Ride VelociCoaster", "tier": "rare", "tag": "Coaster"}, {"id": "hagrids", "label": "Ride Hagrid’s Magical Creatures Motorbike Adventure", "tier": "rare", "tag": "Coaster"}, {"id": "stardust-racers", "label": "Ride Stardust Racers", "tier": "rare", "tag": "Coaster"}, {"id": "level-99", "label": "Level99 perchance", "tier": "main", "tag": "Side Quest"}, {"id": "swo", "label": "SeaWorld Orlando", "tier": "main", "tag": "Theme Park"}, {"id": "kennedy", "label": "Kennedy Space Center", "tier": "rare", "tag": "Florida"}, {"id": "cocoa-beach", "label": "Cocoa Beach day", "tier": "side", "tag": "Florida"}, {"id": "gulf-coast", "label": "Gulf Coast day", "tier": "rare", "tag": "Florida"}, {"id": "gatorland", "label": "Gatorland — Florida demands tribute", "tier": "side", "tag": "Florida"}, {"id": "medieval-times", "label": "Medieval Times", "tier": "side", "tag": "Chaos"}, {"id": "tourist-trap-night", "label": "Do one delightfully tacky Orlando tourist-trap night", "tier": "side", "tag": "Chaos"}]}, {"id": "watch", "title": "2027 Watch List", "icon": "🔭", "accent": "watch", "description": "Announced for 2027, but exact timing may change. These do not count against James% completion.", "items": [{"id": "watch-tropical-americas", "label": "Visit Tropical Americas at Animal Kingdom if open during the program", "tier": "watch", "tag": "2027 Watch", "note": "Disney says the land opens in 2027; no exact opening date is confirmed yet."}, {"id": "watch-indy", "label": "Ride the new Indiana Jones attraction if open", "tier": "watch", "tag": "2027 Watch", "note": "Part of Tropical Americas."}, {"id": "watch-encanto", "label": "Ride the Encanto attraction if open", "tier": "watch", "tag": "2027 Watch", "note": "Part of Tropical Americas."}, {"id": "watch-monstropolis", "label": "Visit Monstropolis at Hollywood Studios if open", "tier": "watch", "tag": "2027 Watch", "note": "Disney says parts of Monstropolis open in 2027."}, {"id": "watch-lakeshore", "label": "Visit Disney Lakeshore Lodge after it opens", "tier": "watch", "tag": "Jul 1, 2027", "note": "Disney currently lists July 1, 2027 as opening day."}]}];
+const SOURCES = [["Tiana’s Bayou Adventure", "https://disneyworld.disney.go.com/attractions/magic-kingdom/tianas-bayou-adventure/", "Current attraction page; refurbishment expected to end Dec. 2026."], ["Rock ’n’ Roller Coaster Starring The Muppets", "https://disneyparksblog.com/wdw/the-electric-mayhem-arrives-at-rock-n-roller-coaster-starring-the-muppets/", "Opened May 26, 2026."], ["DINOSAUR / DinoLand closure", "https://disneyparksblog.com/wdw/dinoland-closing-animal-kingdom/", "DINOSAUR’s final operating day was Feb. 1, 2026."], ["Big Thunder Mountain Railroad", "https://disneyparksblog.com/wdw/new-magic-coming-to-big-thunder-mountain-railroad-at-disney-world/", "Reopened May 3, 2026."], ["Behind the Seeds", "https://disneyworld.disney.go.com/events-tours/epcot/behind-the-seeds/", "Current EPCOT backstage tour."], ["Electrical Water Pageant", "https://disneyworld.disney.go.com/entertainment/magic-kingdom/electrical-water-pageant/", "Current nighttime water pageant."], ["Fantasia Gardens & Fairways", "https://disneyworld.disney.go.com/recreation/fantasia-gardens-fairways-miniature-golf/", "Both courses currently operating."], ["Winter Summerland", "https://disneyworld.disney.go.com/recreation/winter-summerland-miniature-golf/", "Winter and Summer courses currently operating."], ["Disney Resort hotel directory", "https://disneyworld.disney.go.com/resorts/", "Used to fill the missing current resort hotels."], ["The Beak and Barrel", "https://disneyworld.disney.go.com/dining/magic-kingdom/beak-barrel/", "Current Magic Kingdom tavern."], ["T-REX", "https://disneyworld.disney.go.com/dining/disney-springs/t-rex/", "Current Disney Springs restaurant."], ["Festival of the Arts 2027", "https://disneyparksblog.com/wdw/epcot-international-festival-of-the-arts-dates-and-offerings/", "Jan. 15–Mar. 1, 2027."], ["Flower & Garden 2027", "https://disneyparksblog.com/wdw/epcot-international-flower-and-garden-festival-dates-and-details/", "Mar. 10–May 31, 2027."], ["Tropical Americas", "https://disneyparksblog.com/wdw/tropical-americas-encanto-indiana-jones-animal-kingdom/", "Announced for 2027; exact date not yet confirmed."], ["Monstropolis", "https://disneyparksblog.com/wdw/monsters-inc-land-monstropolis-walt-disney-world/", "Parts announced to open in 2027."], ["Disney Lakeshore Lodge", "https://disneyworld.disney.go.com/disneys-lakeshore-lodge/", "Currently listed to open July 1, 2027."], ["Soarin’ Across America", "https://disneyworld.disney.go.com/attractions/epcot/soarin-across-america/", "Current limited-time EPCOT attraction; also listed for 2027 EPCOT After Hours through Aug. 19."], ["Disney water parks / 2027 benefit", "https://disneyworld.disney.go.com/guest-services/water-park-disney-resort-benefit/", "Confirms Typhoon Lagoon and Blizzard Beach remain Disney water parks and notes summer 2027 availability is subject to calendar/operations."]];
+const STORAGE_KEY = "dcpBucketList_singlefile_v1";
+const COMPLETE_KEY = "dcpBucketList_singlefile_complete_v1";
+const UNLOCK_KEY = "dcpBucketList_unlocks_v2";
+let state = {};
+let unlocks = {};
+let activeTier = "all";
+try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { state = {}; }
+try { unlocks = JSON.parse(localStorage.getItem(UNLOCK_KEY)) || {}; } catch { unlocks = {}; }
+
+/* Migrate the old combined Port Orleans checkbox into both new resort entries if needed. */
+if (state["port-orleans"]) {
+  state["port-orleans-fq"] = true;
+  state["port-orleans-riverside"] = true;
+}
+
+const TIER_NAMES = {main:"Main Quest",side:"Side Quest",rare:"Rare",legendary:"Legendary",watch:"2027 Watch"};
+const tierClass = t => "tier-" + t;
+function allItems(){return DATA.flatMap(s=>s.items.map(i=>({...i,sectionId:s.id,sectionTitle:s.title})))}
+function requiredItems(){return allItems().filter(i=>i.tier!=="watch")}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function saveUnlocks(){localStorage.setItem(UNLOCK_KEY,JSON.stringify(unlocks))}
+function progress(items=requiredItems()){const total=items.length,done=items.filter(i=>state[i.id]).length;return {done,total,pct:total?Math.round(done/total*100):0}}
+function sectionProgress(s){return progress(s.items)}
+function toast(text){const el=document.getElementById("toast");document.getElementById("toastText").textContent=text;el.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove("show"),3000)}
+function celebrate(count=55){
+  const layer=document.getElementById("confetti"),colors=["#ffd970","#70cfff","#aa91ff","#7ce5b2","#ffffff"];
+  for(let i=0;i<count;i++){const s=document.createElement("span");s.style.left=Math.random()*100+"vw";s.style.background=colors[Math.floor(Math.random()*colors.length)];s.style.setProperty("--x",((Math.random()-.5)*270)+"px");s.style.animationDelay=Math.random()*.35+"s";s.style.animationDuration=(1.3+Math.random()*1.25)+"s";layer.appendChild(s);setTimeout(()=>s.remove(),3000)}
+}
+function checkUnlocks(){
+  const p=progress();
+  [25,50,75,100].forEach(m=>{
+    const key="overall-"+m;
+    if(p.pct>=m&&!unlocks[key]){unlocks[key]=true;saveUnlocks();toast(m===100?"100% JAMES% — SAVE FILE CLEARED 🏆":`${m}% James% reached`);celebrate(m===100?100:35)}
+  });
+  DATA.filter(s=>s.id!=="watch").forEach(s=>{
+    const sp=sectionProgress(s),key="section-"+s.id;
+    if(sp.total&&sp.done===sp.total&&!unlocks[key]){unlocks[key]=true;saveUnlocks();toast(`${s.title} — category cleared`);celebrate(28)}
+  });
+}
+function renderNav(){document.getElementById("nav").innerHTML=DATA.map(s=>`<a href="#${s.id}">${s.icon} ${s.title}</a>`).join("")}
+function itemHTML(i){
+  const verified = i.tag==="Verified" ? `<span class="badge verified">✓ current</span>` : "";
+  return `<label class="item" data-tier="${i.tier}" data-search="${(i.label+" "+i.tag+" "+(i.note||"")).toLowerCase()}">
+    <input type="checkbox" data-id="${i.id}" ${state[i.id]?"checked":""}>
+    <span class="check"></span>
+    <span class="item-main"><span class="item-label">${i.label}</span>${i.note?`<span class="note">${i.note}</span>`:""}</span>
+    <span class="badges">${verified}<span class="badge ${tierClass(i.tier)}">${TIER_NAMES[i.tier]}</span></span>
+  </label>`;
+}
+function renderSections(){
+  const bucket=document.getElementById("bucket");bucket.innerHTML="";
+  DATA.forEach(s=>{
+    const sp=sectionProgress(s),el=document.createElement("section");
+    el.className="section"+((s.id==="resorts"||s.id==="dcp-life"||s.id==="park-achievements")?" wide":"");
+    el.id=s.id;
+    el.innerHTML=`<div class="section-head"><div class="title-wrap"><div class="icon">${s.icon}</div><div><h3>${s.title}</h3><div class="section-desc">${s.description||s.master||""}</div></div></div><small class="section-count">${sp.done}/${sp.total}</small></div><div class="card">${s.items.map(itemHTML).join("")}</div>`;
+    bucket.appendChild(el);
+  });
+  document.querySelectorAll("input[data-id]").forEach(cb=>cb.addEventListener("change",()=>{
+    state[cb.dataset.id]=cb.checked;save();updateAll();applyFilters();checkUnlocks();
+  }));
+}
+function renderSummary(){
+  const summary=document.getElementById("summary");summary.innerHTML="";
+  const cards=[
+    ["Main Quests",allItems().filter(i=>i.tier==="main")],
+    ["Rare Achievements",allItems().filter(i=>i.tier==="rare")],
+    ["Legendary",allItems().filter(i=>i.tier==="legendary")],
+    ["2027 Watch",allItems().filter(i=>i.tier==="watch")]
+  ];
+  cards.forEach(([name,items])=>{
+    const p=progress(items),c=document.createElement("div");c.className="summary-card"+(p.done===p.total&&p.total?" done":"");
+    c.innerHTML=`<div class="summary-top"><strong>${p.done===p.total&&p.total?"✓ ":""}${name}</strong><span>${p.done}/${p.total}</span></div><div class="bar"><i style="width:${p.pct}%"></i></div>`;summary.appendChild(c);
+  });
+}
+function updateCounts(){
+  DATA.forEach(s=>{const el=document.querySelector(`#${s.id} .section-count`),p=sectionProgress(s);if(el)el.textContent=`${p.done}/${p.total}`});
+}
+function updateProgress(){
+  const p=progress();
+  ["desktopPct","mobilePct"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=p.pct+"%"});
+  ["desktopCount","mobileCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=`${p.done} / ${p.total}`});
+  ["desktopRing","mobileRing"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.setProperty("--p",(p.pct*3.6)+"deg")});
+  const mp=progress(allItems().filter(i=>i.tier==="main")),lp=progress(allItems().filter(i=>i.tier==="legendary")),wp=progress(allItems().filter(i=>i.tier==="watch"));
+  document.getElementById("mainStat").textContent=`${mp.done}/${mp.total}`;
+  document.getElementById("legendStat").textContent=`${lp.done}/${lp.total}`;
+  document.getElementById("watchStat").textContent=`${wp.done}/${wp.total}`;
+  document.getElementById("categoryStat").textContent=DATA.filter(s=>s.id!=="watch"&&sectionProgress(s).done===sectionProgress(s).total).length;
+}
+function updateAll(){updateProgress();renderSummary();updateCounts()}
+function pickQuest(){
+  let pool=allItems().filter(i=>!state[i.id]&&i.tier!=="watch");
+  if(activeTier!=="all"&&["main","side","rare","legendary"].includes(activeTier)) pool=pool.filter(i=>i.tier===activeTier);
+  const out=document.getElementById("missionText");
+  if(!pool.length){out.textContent="Nothing left in this filter. You cleared the board. 🏆";celebrate();return}
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  out.innerHTML=`<strong>${q.label}</strong><br><span style="color:var(--muted)">${TIER_NAMES[q.tier]} · ${q.sectionTitle}</span>`;
+}
+function applyFilters(){
+  const query=document.getElementById("search").value.trim().toLowerCase();
+  DATA.forEach(s=>{
+    const sec=document.getElementById(s.id);let visible=0;
+    sec.querySelectorAll(".item").forEach(row=>{
+      const id=row.querySelector("input").dataset.id;
+      const tierOk=activeTier==="all"||(activeTier==="incomplete"?!state[id]:row.dataset.tier===activeTier);
+      const searchOk=!query||row.dataset.search.includes(query);
+      const show=tierOk&&searchOk;row.classList.toggle("hidden",!show);if(show)visible++;
+    });
+    sec.style.display=visible?"":"none";
+  });
+}
+function exportProgress(){
+  const payload={version:2,exportedAt:new Date().toISOString(),completed:Object.keys(state).filter(k=>state[k]),unlocks:Object.keys(unlocks).filter(k=>unlocks[k])};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="james-dcp-completionist-progress.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),600);
+}
+function importProgress(file){
+  const r=new FileReader();r.onload=()=>{try{
+    const obj=JSON.parse(r.result);if(!Array.isArray(obj.completed))throw new Error();
+    state={};obj.completed.forEach(id=>state[id]=true);unlocks={};(obj.unlocks||[]).forEach(id=>unlocks[id]=true);save();saveUnlocks();renderSections();updateAll();applyFilters();toast("Progress imported — the quest continues ✨");
+  }catch{alert("That file does not look like a compatible DCP Bucket List export.");}};r.readAsText(file)
+}
+function resetProgress(){
+  if(!confirm("Reset every checkbox and achievement? Export first if you want a backup."))return;
+  state={};unlocks={};localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(UNLOCK_KEY);localStorage.removeItem(COMPLETE_KEY);renderSections();updateAll();applyFilters();toast("Fresh save file. Chaos awaits.");
+}
+function renderSources(){
+  document.getElementById("sourceList").innerHTML=SOURCES.map(([name,url,note])=>`<div class="source"><a href="${url}" target="_blank" rel="noopener">${name} ↗</a><p>${note}</p></div>`).join("")
+}
+document.getElementById("search").addEventListener("input",applyFilters);
+document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");activeTier=b.dataset.tier;applyFilters();
+}));
+["desktopRandom","mobileRandom","heroRandom"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("click",pickQuest)});
+["desktopExport","mobileExport"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("click",exportProgress)});
+["desktopImport","mobileImport"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("change",ev=>{if(ev.target.files?.[0])importProgress(ev.target.files[0]);ev.target.value=""})});
+document.getElementById("desktopReset").addEventListener("click",resetProgress);
+renderNav();renderSections();renderSummary();updateProgress();renderSources();applyFilters();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => {
+      console.warn("Service worker registration failed:", err);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
