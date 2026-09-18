@@ -1,4 +1,4 @@
-const CACHE_NAME = "dcp-bucket-list-v1";
+const CACHE_NAME = "dcp-bucket-list-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -27,17 +27,32 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
+  const request = event.request;
+  const isNavigation = request.mode === "navigate" ||
+    request.headers.get("accept")?.includes("text/html");
 
-      return fetch(event.request)
+  if (isNavigation) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" })
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
           return response;
         })
-        .catch(() => caches.match("./index.html"));
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then(cached => {
+      const network = fetch(request).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+        return response;
+      }).catch(() => cached);
+
+      return cached || network;
     })
   );
 });
