@@ -333,6 +333,69 @@ const SECRET_ACHIEVEMENTS = [
     description:"Hit a park before work, after work, and on a stupidly late post-work trip.",
     icon:"🦩",
     requires:["before-work-park","after-work-park","late-postwork"]
+  },
+  {
+    id:"secret-turnstile-terror",
+    title:"Turnstile Terror",
+    description:"Rope drop all four parks, close all four parks, and survive a true open-to-close day.",
+    icon:"⏰",
+    requires:["rope-drop-all","close-all","open-close-day"]
+  },
+  {
+    id:"secret-transit-final-boss",
+    title:"Public Transit Final Boss",
+    description:"Complete the four-mode transport challenge, ride every Skyliner segment, loop the Resort Monorail, and intentionally take a terrible route.",
+    icon:"🚌",
+    requires:["transport-day","skyliner-all-lines","monorail-resort","bad-route"]
+  },
+  {
+    id:"secret-resort-cryptid",
+    title:"Resort Lobby Cryptid",
+    description:"Complete the Monorail crawl, Skyliner crawl and Crescent Lake loop, then haunt the BoardWalk and Polynesian after dark.",
+    icon:"🛎️",
+    requires:["monorail-crawl","skyliner-crawl","crescent-loop","boardwalk-night","poly-beach"]
+  },
+  {
+    id:"secret-four-icons",
+    title:"Four Icons, One Legend",
+    description:"Collect the hero shot at Cinderella Castle, Spaceship Earth, Tower of Terror and the Tree of Life.",
+    icon:"📸",
+    requires:["castle-photo","epcot-photo","tower-photo","tree-photo"]
+  },
+  {
+    id:"secret-epcot-passport",
+    title:"EPCOT Passport: 100%",
+    description:"Eat or drink around every World Showcase pavilion, photograph every pavilion, and experience both program-season EPCOT festivals.",
+    icon:"🌐",
+    requires:["epcot-snack-world","epcot-photo-world","festival-arts","festival-fg"]
+  },
+  {
+    id:"secret-imagineering-brainworms",
+    title:"Imagineering Brainworms",
+    description:"Do Behind the Seeds, take a backstage tour, find 25 Hidden Mickeys, and document one absurdly specific detail in every park.",
+    icon:"🧠",
+    requires:["behind-seeds","bts-tour","hidden-mickey-25","details-four-parks"]
+  },
+  {
+    id:"secret-memory-hoarder",
+    title:"Core Memory Hoarder",
+    description:"Keep up the weekly photo and memory rituals, recreate the Day 1 photo, then finish both the recap video and photo album.",
+    icon:"🎞️",
+    requires:["weekly-photo","weekly-memory","day1-final-photo","dcp-movie","photo-album"]
+  },
+  {
+    id:"secret-florida-man",
+    title:"Florida Man Arc Complete",
+    description:"Ride through a Florida downpour, visit Gatorland, hit Cocoa Beach, and embrace one delightfully tacky Orlando tourist-trap night.",
+    icon:"🐊",
+    requires:["rain-ride","gatorland","cocoa-beach","tourist-trap-night"]
+  },
+  {
+    id:"secret-no-parks-needed",
+    title:"Theme Parks Are Optional",
+    description:"Complete a No-Parks Disney Day, properly explore Disney Springs, go bowling at Splitsville, and catch a Movie Under the Stars.",
+    icon:"🌙",
+    requires:["no-parks-day","disney-springs","splitsville-bowling","resort-movie"]
   }
 ];
 const tierClass = t => "tier-" + t;
@@ -414,7 +477,7 @@ function renderSecrets(){
             <div class="secret-icon">${unlocked?secret.icon:"?"}</div>
             <div class="secret-copy">
               <strong>${unlocked?secret.title:"???"}</strong>
-              <p>${unlocked?secret.description:"Hidden condition"}</p>
+              <p>${unlocked?secret.description:"Keep playing. The app knows."}</p>
               <span class="secret-rarity">${unlocked?"Secret unlocked":"Secret achievement"}</span>
             </div>
           </div>`;
