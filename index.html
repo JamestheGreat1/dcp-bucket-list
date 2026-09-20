@@ -400,8 +400,22 @@ function progress(items=requiredItems()){const total=items.length,done=items.fil
 function sectionProgress(s){return progress(s.items)}
 function toast(text){const el=document.getElementById("toast");document.getElementById("toastText").textContent=text;el.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove("show"),3000)}
 function celebrate(count=55){
-  const layer=document.getElementById("confetti"),colors=["#ffd970","#70cfff","#aa91ff","#7ce5b2","#ffffff"];
-  for(let i=0;i<count;i++){const s=document.createElement("span");s.style.left=Math.random()*100+"vw";s.style.background=colors[Math.floor(Math.random()*colors.length)];s.style.setProperty("--x",((Math.random()-.5)*270)+"px");s.style.animationDelay=Math.random()*.35+"s";s.style.animationDuration=(1.3+Math.random()*1.25)+"s";layer.appendChild(s);setTimeout(()=>s.remove(),3000)}
+  const layer=document.getElementById("confetti");
+  const styles=getComputedStyle(document.documentElement);
+  const colors=["--main","--rare","--legendary","--green","--sky"]
+    .map(name=>styles.getPropertyValue(name).trim())
+    .filter(Boolean)
+    .concat("#ffffff");
+  for(let i=0;i<count;i++){
+    const s=document.createElement("span");
+    s.style.left=Math.random()*100+"vw";
+    s.style.background=colors[Math.floor(Math.random()*colors.length)];
+    s.style.setProperty("--x",((Math.random()-.5)*270)+"px");
+    s.style.animationDelay=Math.random()*.35+"s";
+    s.style.animationDuration=(1.3+Math.random()*1.25)+"s";
+    layer.appendChild(s);
+    setTimeout(()=>s.remove(),3000);
+  }
 }
 function syncSecretAchievements(showToast=true){
   let changed=false;
@@ -425,12 +439,35 @@ function checkUnlocks(){
     const key="overall-"+m;
     if(p.pct>=m&&!unlocks[key]){unlocks[key]=true;saveUnlocks();toast(m===100?"100% JAMES% — SAVE FILE CLEARED 🏆":`${m}% James% reached`);celebrate(m===100?100:35)}
   });
+  let categoryUnlocksChanged=false;
   DATA.filter(s=>s.id!=="watch").forEach(s=>{
     const sp=sectionProgress(s),key="section-"+s.id;
-    if(sp.total&&sp.done===sp.total&&!unlocks[key]){unlocks[key]=true;saveUnlocks();toast(`${s.title} — category cleared`);celebrate(28)}
+    const complete=sp.total&&sp.done===sp.total;
+    if(!complete&&unlocks[key]){
+      delete unlocks[key];
+      categoryUnlocksChanged=true;
+    }else if(complete&&!unlocks[key]){
+      unlocks[key]=true;
+      categoryUnlocksChanged=true;
+      toast(`${s.title} — category cleared`);
+      celebrate(28);
+    }
   });
+  if(categoryUnlocksChanged) saveUnlocks();
   if(syncSecretAchievements(true)) renderSecrets();
 }
+function rearmIncompleteCategories(){
+  let changed=false;
+  DATA.filter(s=>s.id!=="watch").forEach(s=>{
+    const key="section-"+s.id,sp=sectionProgress(s);
+    if((!sp.total||sp.done!==sp.total)&&unlocks[key]){
+      delete unlocks[key];
+      changed=true;
+    }
+  });
+  if(changed) saveUnlocks();
+}
+
 function renderNav(){document.getElementById("nav").innerHTML=DATA.map(s=>`<a href="#${s.id}">${s.icon} ${s.title}</a>`).join("")+`<a href="#secrets">🔒 Secret Achievements</a>`}
 function itemHTML(i){
   const verified = i.tag==="Verified" ? `<span class="badge verified">✓ current</span>` : "";
@@ -582,7 +619,7 @@ document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
 ["desktopExport","mobileExport"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("click",exportProgress)});
 ["desktopImport","mobileImport"].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener("change",ev=>{if(ev.target.files?.[0])importProgress(ev.target.files[0]);ev.target.value=""})});
 document.getElementById("desktopReset").addEventListener("click",resetProgress);
-syncSecretAchievements(false);renderNav();renderSections();renderSummary();updateProgress();renderSources();applyFilters();
+rearmIncompleteCategories();syncSecretAchievements(false);renderNav();renderSections();renderSummary();updateProgress();renderSources();applyFilters();
 </script>
 
 <script>
