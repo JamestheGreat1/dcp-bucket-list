@@ -150,10 +150,11 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
 .footer{text-align:center;color:var(--muted);font-size:.76rem;margin-top:27px;line-height:1.45}
 .toast{
   position:fixed;right:22px;bottom:22px;z-index:1000;max-width:360px;padding:15px 16px;border-radius:17px;
+  text-align:center;
   background:rgba(11,31,65,.95);border:1px solid rgba(255,217,112,.25);box-shadow:var(--shadow);
   transform:translateY(130%);opacity:0;transition:.28s ease;backdrop-filter:blur(15px)
 }
-.toast.show{transform:translateY(0);opacity:1}.toast small{display:block;color:var(--gold);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900}.toast strong{display:block;margin-top:3px}
+.toast.show{transform:translateY(0);opacity:1}.toast small{display:block;text-align:center;color:var(--gold);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900}.toast strong{display:block;margin-top:5px;text-align:center;line-height:1.25}
 .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:999}
 .confetti span{position:absolute;top:-20px;width:9px;height:15px;border-radius:2px;animation:fall 1.9s linear forwards}
 @keyframes fall{to{transform:translate3d(var(--x),110vh,0) rotate(720deg);opacity:.85}}
@@ -198,7 +199,7 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
 @media(max-width:560px){
  .hero{border-radius:22px}.hero h2{font-size:2.15rem}.summary-grid{gap:7px}.summary-card{padding:12px}
  .section.wide .card{grid-template-columns:1fr}.tag-only{display:none}.item{padding:11px 10px}.note{font-size:.67rem}
- .toast{left:10px;right:10px;bottom:10px}.badges{max-width:110px;justify-content:flex-end;flex-wrap:wrap}
+ .toast{left:10px;right:10px;bottom:10px;max-width:none;margin:0 auto}.badges{max-width:110px;justify-content:flex-end;flex-wrap:wrap}
 }
 </style>
 
