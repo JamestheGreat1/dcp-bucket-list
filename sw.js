@@ -1,4 +1,4 @@
-const CACHE_NAME = "dcp-bucket-list-v8";
+const CACHE_NAME = "dcp-bucket-list-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
