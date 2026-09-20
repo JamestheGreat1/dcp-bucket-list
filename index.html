@@ -159,7 +159,7 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
 .confetti span{position:absolute;top:-20px;width:9px;height:15px;border-radius:2px;animation:fall 1.9s linear forwards}
 @keyframes fall{to{transform:translate3d(var(--x),110vh,0) rotate(720deg);opacity:.85}}
 
-.secret-achievements{grid-column:1/-1}
+.secret-achievements{grid-column:1/-1;margin-bottom:23px}
 .secret-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .secret-achievement{
   min-height:112px;padding:16px;border-radius:18px;
@@ -290,6 +290,7 @@ button:hover,.file-btn:hover{background:rgba(255,255,255,.12);transform:translat
   </div>
 
   <div class="summary-grid" id="summary"></div>
+  <div id="secretsMount"></div>
   <div class="content-grid" id="bucket"></div>
 
   <details class="sources">
@@ -485,13 +486,14 @@ function itemHTML(i){
   </label>`;
 }
 function renderSecrets(){
+  const mount=document.getElementById("secretsMount");
   let section=document.getElementById("secrets");
   if(!section){
     section=document.createElement("section");
     section.id="secrets";
     section.className="section secret-achievements";
-    document.getElementById("bucket").appendChild(section);
   }
+  if(section.parentElement!==mount) mount.appendChild(section);
 
   const unlockedCount=SECRET_ACHIEVEMENTS.filter(s=>unlocks[s.id]).length;
   section.innerHTML=`
@@ -596,8 +598,6 @@ function applyFilters(){
     });
     sec.style.display=visible?"":"none";
   });
-  const secrets=document.getElementById("secrets");
-  if(secrets) secrets.style.display=(activeTier==="all"&&!query)?"":"none";
 }
 function exportProgress(){
   const payload={version:3,exportedAt:new Date().toISOString(),completed:Object.keys(state).filter(k=>state[k]),unlocks:Object.keys(unlocks).filter(k=>unlocks[k])};
