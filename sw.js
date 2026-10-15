@@ -1,4 +1,4 @@
-const CACHE_NAME = "dcp-bucket-list-v14";
+const CACHE_NAME = "dcp-bucket-list-v15";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -20,7 +20,7 @@ self.addEventListener("activate", event => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.filter(key => key.startsWith("dcp-bucket-list-") && key !== CACHE_NAME).map(key => caches.delete(key))
       );
       await self.clients.claim();
     })()
